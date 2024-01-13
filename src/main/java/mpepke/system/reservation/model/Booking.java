@@ -1,11 +1,12 @@
 package mpepke.system.reservation.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import lombok.Data;
-
-import java.sql.Time;
-import java.util.LinkedHashSet;
+import java.sql.Date;
+import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 @Data
@@ -16,18 +17,34 @@ public class Booking {
     @Column(name = "booking_id", nullable = false)
     private Long id;
 
-    private Time dateStart;
-    private Time dateEnd;
+    private Date dateStart;
+    private Date dateEnd;
     private float totalHourBooked;
 
-    @OneToOne(orphanRemoval = true)
-    @JoinColumn(name = "room_id")
-    private Room room;
-
     @ManyToMany
-    @JoinTable(name = "Booking_users",
+    @JoinTable(name = "user_booking",
             joinColumns = @JoinColumn(name = "booking_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id"))
-    private Set<UserApp> users = new LinkedHashSet<>();
+    @JsonIgnore
+    private Set<UserApp> users = new HashSet<>();
+
+    @ManyToMany
+    @JoinTable(name = "room_booking",
+            joinColumns = @JoinColumn(name = "booking_id"),
+            inverseJoinColumns = @JoinColumn(name = "room_id"))
+    private Set<Room> rooms = new HashSet<>();
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Booking booking = (Booking) o;
+        return Objects.equals(id, booking.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
 
 }
